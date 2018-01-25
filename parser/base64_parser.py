@@ -89,7 +89,7 @@ class ParserThread(threading.Thread):
             value = ''
             try:
                 value = tag.replace('\n', '').replace('\r', '').replace('\t', '').replace('|', '/') \
-                    .replace('"', '').replace('  ', '').replace('NULL', '')
+                    .replace('"', '').replace('  ', '').replace('NULL', '').replace(';', ',')
             except:
                 value = ''
             return value
@@ -119,6 +119,7 @@ class ParserThread(threading.Thread):
             cert = x509.load_der_x509_certificate(bytes(temp_cert.GetRawCertData()),
                                                   default_backend())
             data = None
+            X509Entity['serial'] = temp_cert.GetSerialNumberString()
             temp_cert = None
             # SubjectInfo
 
@@ -158,7 +159,7 @@ class ParserThread(threading.Thread):
 
             X509Entity['Subject_CommonName'] = ''.join([getvalue(x.value) for x in cert.subject if (
                 oid2name.get(x.oid) or get_oid(x.oid.dotted_string)) == 'commonName'])
-            X509Entity['Subject_Department'] = ' '.join(
+            X509Entity['Subject_Department'] = '; '.join(
                 [getvalue(x.value) for x in cert.subject if (
                     oid2name.get(x.oid) or get_oid(
                         x.oid.dotted_string)) == 'organizationalUnitName'])
@@ -181,16 +182,13 @@ class ParserThread(threading.Thread):
                 oid2name.get(x.oid) or get_oid(x.oid.dotted_string)) == 'title'])
 
             X509Entity['Thumb'] = str(cert.fingerprint(hashes.SHA1()).hex().upper())
-            X509Entity['serial'] = str(hex(cert.serial_number))
+            # X509Entity['serial'] = str(hex(cert.serial_number))
             X509Entity['ValidFrom'] = cert.not_valid_before.strftime('%Y-%m-%d')
             X509Entity['ValidTo'] = cert.not_valid_after.strftime('%Y-%m-%d')
 
             # IssuerInfo
             X509Entity['Issuer_CN'] = ''.join([getvalue(x.value) for x in cert.issuer if (
                 oid2name.get(x.oid) or get_oid(x.oid.dotted_string)) == 'commonName'])
-            #Too long!
-			# if X509Entity['Thumb'] not in list(map(lambda x: x['Thumb'], X509list)):
-            #     X509list.append(X509Entity)
 
             X509Entity['sign'] = self.__base64
             try:
