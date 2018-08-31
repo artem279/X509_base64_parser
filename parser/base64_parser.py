@@ -13,7 +13,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import ExtensionOID
 
 csv.register_dialect('csvCommaDialect', delimiter='|', lineterminator='\n')
-bad = 'C:/bad/'
 
 
 def getbase64Array(file):
@@ -31,60 +30,6 @@ class ParserThread(threading.Thread):
         self.__mutex = mut
 
     def parse(self):
-
-        def Try_catchDecorator(myFunc):
-            def wrapper(value):
-                try:
-                    val = value.text
-                    return myFunc(val)
-                except:
-                    val = ''
-                    return myFunc(val)
-
-            return wrapper
-
-        def TryExceptDecorator(myFunc):
-            def wrapper(value1, value2):
-                try:
-                    val1 = value1.tag
-                    return myFunc(value1, value2)
-                except:
-                    try:
-                        val2 = value2.tag
-                        return myFunc(value1, value2)
-                    except:
-                        value1 = ''
-                        value2 = ''
-                        return myFunc(value1, value2)
-
-            return wrapper
-
-        @TryExceptDecorator
-        def TryExcept(val1, val2):
-            content = ''
-            if val1 is not None:
-                content = val1
-            else:
-                content = val2
-            return content
-
-        @Try_catchDecorator
-        def try_catch(value):
-            content = value.replace('\n', '').replace('\r', '').replace('\t', '').replace('|', '/').replace('"', '')
-            return content
-
-        def cleannamespaces(root):
-            for elem in root.getiterator():
-                if not hasattr(elem.tag, 'find'):
-                    continue  # (1)
-                i = elem.tag.find('}')
-                if i >= 0:
-                    elem.tag = elem.tag[i + 1:]
-
-            objectify.deannotate(root, cleanup_namespaces=True)
-
-            return root
-
         def getvalue(tag):
             value = ''
             try:
@@ -254,10 +199,8 @@ def createthreadparserzip(count, zip_files):
     mutex = threading.Lock()
     listthrd = []
     while len(zip_files) != 0:
-        # print(threading.active_count())
         if threading.active_count() <= count:
             file = zip_files.pop()
-            # print(file)
             parserthrd = ParserThread(file, mutex)
             parserthrd.start()
             listthrd.append(parserthrd)
@@ -269,9 +212,9 @@ def createthreadparserzip(count, zip_files):
 
 
 t0 = time.time()
-xmllist = getbase64Array('C:/Users/username/PycharmProjects/base64_certs.csv')
+sign_list = getbase64Array('base64_certs.csv')
 # first argument - count of threads, second argument - list of base64 strings
-createthreadparserzip(5, xmllist)
+createthreadparserzip(5, sign_list)
 t = time.time() - t0
 print('Total time (sec.): %fs' % t)
 with open('timelog.log', 'at', encoding='cp1251', errors='ignore') as file:
