@@ -1,7 +1,4 @@
-﻿from lxml import etree, objectify
-import os, csv, threading, time
-from zipfile import ZipFile
-from shutil import copy2
+﻿import threading, time
 import dotnet
 import dotnet.seamless
 import System
@@ -11,8 +8,6 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.x509.oid import ExtensionOID
-
-csv.register_dialect('csvCommaDialect', delimiter='|', lineterminator='\n')
 
 
 def getbase64Array(file):
